@@ -59,7 +59,7 @@ jobs:
      - generate
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v6
         with: 
@@ -71,10 +71,11 @@ jobs:
           mkdir $RUNNER_TEMP/svu
           wget -qO- https://github.com/caarlos0/svu/releases/download/v3.3.0/svu_3.3.0_linux_amd64.tar.gz | tar xzf - -C $RUNNER_TEMP/svu
           chmod +x $RUNNER_TEMP/svu/svu
+          current=$($RUNNER_TEMP/svu/svu current)
           next=$($RUNNER_TEMP/svu/svu next)
-          git tag $next
-          git push origin $next
-      
+          if [ "$current" != "$next" ]; then gh workflow run cd.yml -f tag=$next; fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   ## Removed as there are no tests currently
   # # Run acceptance tests in a matrix with Terraform CLI versions
   # test:
