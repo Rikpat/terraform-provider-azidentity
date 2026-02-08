@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-
 package provider
 
 import (
@@ -33,9 +31,11 @@ func selectCloud(c string) (cloud.Configuration, diag.Diagnostic) {
 }
 
 // Convert from types.String and fetch environment variables if available.
-func parseField(in types.String, field reflect.StructField, out reflect.Value, p path.Path) diag.Diagnostic {
-	if !in.IsNull() {
-		out.SetString(in.ValueString())
+func parseField(in reflect.Value, field reflect.StructField, out reflect.Value, p path.Path) diag.Diagnostic {
+	if inVal, ok := in.Interface().(types.String); !ok {
+		return diag.NewAttributeErrorDiagnostic(p.AtMapKey(field.Name), "Failed parsing value", "Failed parsing value into string. This is a provider issue, please report it.")
+	} else if !inVal.IsNull() {
+		out.SetString(inVal.ValueString())
 		return nil
 	}
 	if envs, ok := field.Tag.Lookup("env"); ok {
@@ -73,11 +73,8 @@ func parseObject[M interface{}, P interface{}](ctx context.Context, in types.Obj
 	o := reflect.ValueOf(parsed)
 
 	for i := 0; i < t.NumField(); i++ {
-		diags.Append(parseField(reflect.Indirect(v).Field(i).Interface().(types.String), t.Field(i), reflect.Indirect(o).Field(i), p))
+		diags.Append(parseField(reflect.Indirect(v).Field(i), t.Field(i), reflect.Indirect(o).Field(i), p))
 	}
-
-	ctx = tflog.SetField(ctx, "parsed", parsed)
-	tflog.Info(ctx, "Parsed property")
 	return parsed
 }
 

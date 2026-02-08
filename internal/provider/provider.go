@@ -1,6 +1,3 @@
-// Copyright IBM Corp. 2021, 2025
-// SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 import (
@@ -56,15 +53,15 @@ Most credentials have options like selecting client_id and tenant_id, except for
 
 				MarkdownDescription: `List of credentials to try. They will be tried in the specified order. 
 	
-	Supported types are (enabled by default in this order are in bold, similar to defaultAzureCredential): 
-	- **environment_credential**
-	- **azure_pipelines_credential** 
-	- **workload_identity_credential**
-	- **managed_identity_credential**
-	- **azure_cli_credential**
+	Supported types are: 
+	- environment_credential
+	- azure_pipelines_credential 
+	- workload_identity_credential
+	- managed_identity_credential
+	- azure_cli_credential
 	- client_secret_credential
 	- client_certificate_credential`,
-				Optional: true,
+				Required: true,
 				Validators: []validator.List{
 					listvalidator.UniqueValues(),
 					listvalidator.ValueStringsAre(
@@ -112,37 +109,68 @@ Most credentials have options like selecting client_id and tenant_id, except for
 				},
 			},
 			"workload_identity_credential": schema.SingleNestedAttribute{
-				MarkdownDescription: "Configuration for workload identity credential. You can provide custom client_id and tenant_id if using multiple workload identities on single pod.",
+				MarkdownDescription: "Configuration for workload identity credential. You can provide custom `client_id` and `tenant_id` if using multiple workload identities on single pod.",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
-					"tenant_id": schema.StringAttribute{Optional: true},
-					"client_id": schema.StringAttribute{Optional: true},
+					"tenant_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Optional override of tenant_id, if not using the identity specified in service account annotations (in *AZURE_TENANT_ID* env variable)",
+					},
+					"client_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Optional override of client_id, if not using the identity specified in service account annotations (in *AZURE_CLIENT_ID* env variable)"},
 				},
 			},
 			"managed_identity_credential": schema.SingleNestedAttribute{
 				MarkdownDescription: "Configuration for Managed Identity credential (optional `client_id` for user-assigned identity).",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
-					"client_id": schema.StringAttribute{Optional: true},
+					"client_id": schema.StringAttribute{
+						Optional:            true,
+						MarkdownDescription: "Optional override of client_id, if using user-assigned identity",
+					},
 				},
 			},
 			"client_secret_credential": schema.SingleNestedAttribute{
 				MarkdownDescription: "Configuration for a client secret credential. All properties are required, as there's already environment_credential that provides same functionality with env variables.",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
-					"tenant_id":     schema.StringAttribute{Required: true},
-					"client_id":     schema.StringAttribute{Required: true},
-					"client_secret": schema.StringAttribute{Required: true, Sensitive: true},
+					"tenant_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Tenant ID of the service principal",
+					},
+					"client_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Client ID of the service principal",
+					},
+					"client_secret": schema.StringAttribute{
+						Required:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Client Secret of the service principal",
+					},
 				},
 			},
 			"client_certificate_credential": schema.SingleNestedAttribute{
-				MarkdownDescription: "Configuration for a client certificate credential. All properties are required, as there's already environment_credential that provides same functionality with env variables.",
+				MarkdownDescription: "Configuration for a client certificate credential. All properties (except password in case of unencrypted certificate) are required, as there's already environment_credential that provides same functionality with env variables.",
 				Optional:            true,
 				Attributes: map[string]schema.Attribute{
-					"tenant_id":            schema.StringAttribute{Required: true},
-					"client_id":            schema.StringAttribute{Required: true},
-					"certificate_path":     schema.StringAttribute{Required: true},
-					"certificate_password": schema.StringAttribute{Optional: true, Sensitive: true},
+					"tenant_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Tenant ID of the service principal",
+					},
+					"client_id": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Client ID of the service principal",
+					},
+					"certificate_path": schema.StringAttribute{
+						Required:            true,
+						MarkdownDescription: "Path to certificate used for authentication. Can be relative to current working directory (terraform root).",
+					},
+					"certificate_password": schema.StringAttribute{
+						Optional:            true,
+						Sensitive:           true,
+						MarkdownDescription: "Password to certificate file, if used.",
+					},
 				},
 			},
 		},

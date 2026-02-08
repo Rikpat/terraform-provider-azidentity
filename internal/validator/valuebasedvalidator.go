@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-
 package validator
 
 import (
@@ -9,13 +7,6 @@ import (
 )
 
 var (
-	// Should work for all, but only string needed
-	// _ validator.Bool    = ValueBasedValidator{}
-	// _ validator.Float32 = ValueBasedValidator{}
-	// _ validator.Float64 = ValueBasedValidator{}
-	// _ validator.Int32   = ValueBasedValidator{}
-	// _ validator.Int64   = ValueBasedValidator{}
-	// _ validator.Number  = ValueBasedValidator{}
 	_ validator.String = ValueBasedValidator{}
 )
 

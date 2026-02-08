@@ -1,5 +1,3 @@
-# Copyright (c) HashiCorp, Inc.
-
 provider "azidentity" {
   # Simple pipeline identity with cli fallback for local
   credentials = ["azure_pipelines_credential", "azure_cli_credential"]

@@ -13,8 +13,6 @@ Fetches Microsoft login access token to be used with different resources (ex. da
 ## Example Usage
 
 ```terraform
-# Copyright (c) HashiCorp, Inc.
-
 ephemeral "azidentity_token" "token" {
   scopes = ["https://management.azure.com/.default"]
 }
